@@ -1,1 +1,1 @@
-Hello, Gleb! Please continue to learn!!!
+Hello World! AWS version!

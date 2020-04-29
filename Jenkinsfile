@@ -1,47 +1,41 @@
 pipeline {
     agent any
-
-    tools {
-        maven 'maven-3.6.3'
+      parameters {
+         string(name: 'tomcat_dev', defaultValue: '34.219.153.51', description: 'Staging Server')
+         string(name: 'tomcat_prod', defaultValue: '34.222.149.178', description: 'Production Server')
     }
 
-    stages{
-            stage('Build'){
-                steps {
-                    sh 'mvn clean package'
-                }
-                post {
-                    success {
-                        echo 'Now Archiving...'
-                        archiveArtifacts artifacts: '**/target/*.war'
-                    }
-                }
-            }
-            stage ('Deploy to Staging'){
-                steps {
-                    build job: 'deploy-to-staging'
-                }
-            }
+      triggers{
+           pollSCM('* * * * *')
+      }
 
-            stage ('Deploy to Production'){
-                steps{
-                    timeout(time:5, unit:'DAYS'){
-                        input message:'Approve PRODUCTION Deployment?'
-                    }
+      stages{
+              stage('Build'){
+                  steps {
+                      sh 'mvn clean package'
+                  }
+                  post {
+                      success {
+                          echo 'Now Archiving...'
+                          archiveArtifacts artifacts: '**/target/*.war'
+                      }
+                  }
+              }
 
-                    build job: 'deploy-to-prod'
-                }
-                post {
-                    success {
-                        echo 'Code deployed to Production.'
-                    }
+              stage ('Deployments'){
+                  parallel{
+                      stage ('Deploy to Staging'){
+                          steps {
+                              sh "scp -i /Users/GlebRice41/app/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_dev}:/var/lib/tomcat8/webapps"
+                          }
+                      }
 
-                    failure {
-                        echo ' Deployment failed.'
-                    }
-                }
-            }
-
-
-        }
-    }
+                      stage ("Deploy to Production"){
+                          steps {
+                              sh "scp -i /Users/GlebRice41/app/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_prod}:/var/lib/tomcat8/webapps"
+                          }
+                      }
+                  }
+              }
+          }
+      }
