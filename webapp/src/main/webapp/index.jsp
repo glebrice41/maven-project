@@ -1,1 +1,1 @@
-Hello World! AWS version!
+AWS version, version 2!
