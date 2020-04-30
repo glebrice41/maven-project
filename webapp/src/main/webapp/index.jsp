@@ -1,1 +1,1 @@
-AWS version, version 2!
+Added new IP's to AWS
