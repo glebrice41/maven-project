@@ -1,13 +1,7 @@
-pipeline{
-     agent any
-        tools{
-        maven 'maven-3.6.3'
-        }
-     stages{
-        stage('Build'){
-            steps{
-                sh 'mvn clean package'
-            }
-        }
-     }
-}
+FROM tomcat:8.0
+
+ADD ./webapp/target/*.war /usr/local/tomcat/webapps/
+
+EXPOSE 8080
+
+CMD ["catalina.sh", "run"]
