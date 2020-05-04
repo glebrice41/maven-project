@@ -1,1 +1,1 @@
-Just a small change to refresh knowledges! 
+To refresh previous Jenkins lessons lets make some changes here
